@@ -1,8 +1,11 @@
 import os
 import json
+import logging
 from dataclasses import dataclass, field
 from typing import AsyncGenerator
 import anthropic
+
+logger = logging.getLogger(__name__)
 
 SOPHIA_MODEL = "claude-sonnet-4-6"
 
@@ -175,7 +178,7 @@ class SophiaAgent:
                                     predicted_narrative=data["predicted_narrative"],
                                     overall_confidence=data["overall_confidence"]
                                 )
-                        except (json.JSONDecodeError, KeyError):
-                            pass
+                        except (json.JSONDecodeError, KeyError) as e:
+                            logger.warning(f"SOPHIA tool output parse failed (tool={active_tool}): {e}")
                         active_tool = None
                         tool_json_buffer = ""
