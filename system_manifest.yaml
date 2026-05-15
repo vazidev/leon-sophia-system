@@ -1,0 +1,48 @@
+system:
+  name: LEON-SOPHIA Dual-Agent Reasoning System
+  version: 1.0.0
+  created: 2026-05-14
+  status: active
+
+agents:
+  - id: LEON
+    role: strategic_planner
+    disposition: constructive
+    primary_mode: forward_planning
+    path: agents/LEON/
+
+  - id: SOPHIA
+    role: adversarial_critic
+    disposition: skeptical
+    primary_mode: review_and_challenge
+    path: agents/SOPHIA/
+
+synthesis:
+  arbitration: synthesis/arbitration_engine.md
+  debate: synthesis/debate_protocol.md
+  decision: synthesis/decision_protocol.md
+  escalation: synthesis/escalation_rules.md
+
+standards:
+  evidence: shared/evidence_standards.md
+  memory: shared/memory_protocol.md
+  context: shared/context_rules.md
+  terminology: shared/terminology.md
+
+quality_gates:
+  - sophia_bias_check: blocking
+  - evidence_standard_met: blocking
+  - decision_quality_score_min: 7
+  - ethics_clearance: blocking
+
+workflows:
+  - id: idea_to_plan
+    path: workflows/idea_to_plan.md
+  - id: post_mortem
+    path: workflows/post_mortem_reverse_path.md
+  - id: feature_review
+    path: workflows/feature_development_review.md
+  - id: strategic_design
+    path: workflows/strategic_system_design.md
+  - id: tool_gap_analysis
+    path: workflows/tool_gap_analysis.md
