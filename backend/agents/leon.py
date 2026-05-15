@@ -4,6 +4,8 @@ from dataclasses import dataclass
 from typing import AsyncGenerator
 import anthropic
 
+LEON_MODEL = "claude-sonnet-4-6"
+
 LEON_SYSTEM = """You are LEON, a forward-planning strategic analyst.
 Your role: produce well-evidenced analysis and concrete recommendations.
 You respond to SOPHIA's critique by deepening your analysis — expanding evidence,
@@ -72,7 +74,7 @@ class LeonAgent:
         collecting_tool = False
 
         async with self._client.messages.stream(
-            model="claude-sonnet-4-6",
+            model=LEON_MODEL,
             max_tokens=2048,
             system=LEON_SYSTEM,
             messages=messages,
@@ -86,13 +88,16 @@ class LeonAgent:
                         collecting_tool = True
                         tool_json_buffer += event.delta.partial_json
                 elif event.type == "message_stop":
-                    if collecting_tool:
-                        data = json.loads(tool_json_buffer)
-                        yield LeonChunk(
-                            recommendation=data["recommendation"],
-                            evidence=data["evidence"],
-                            new_claims=data["new_claims"],
-                            resolved_flags=data["resolved_flags"],
-                            scope_keywords=data["scope_keywords"],
-                            confidence_score=data["confidence_score"],
-                        )
+                    if collecting_tool and tool_json_buffer:
+                        try:
+                            data = json.loads(tool_json_buffer)
+                            yield LeonChunk(
+                                recommendation=data["recommendation"],
+                                evidence=data["evidence"],
+                                new_claims=data["new_claims"],
+                                resolved_flags=data["resolved_flags"],
+                                scope_keywords=data["scope_keywords"],
+                                confidence_score=data["confidence_score"],
+                            )
+                        except (json.JSONDecodeError, KeyError):
+                            pass  # Tool output malformed — no LeonChunk emitted

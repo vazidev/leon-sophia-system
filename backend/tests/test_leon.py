@@ -16,6 +16,9 @@ async def test_leon_emits_chunks():
         "confidence_score": 0.75
     }
 
+    tool_json_str = json.dumps(tool_input)
+    mid = len(tool_json_str) // 2
+
     fake_events = [
         MagicMock(type="content_block_delta",
                   delta=MagicMock(type="text_delta", text="Use micro")),
@@ -23,7 +26,10 @@ async def test_leon_emits_chunks():
                   delta=MagicMock(type="text_delta", text="services")),
         MagicMock(type="content_block_delta",
                   delta=MagicMock(type="input_json_delta",
-                                  partial_json=json.dumps(tool_input))),
+                                  partial_json=tool_json_str[:mid])),
+        MagicMock(type="content_block_delta",
+                  delta=MagicMock(type="input_json_delta",
+                                  partial_json=tool_json_str[mid:])),
         MagicMock(type="message_stop"),
     ]
 
