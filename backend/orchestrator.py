@@ -1,8 +1,11 @@
 import json
+import logging
 from datetime import datetime, timezone
 from typing import AsyncGenerator
 from sqlmodel import Session, select
 import db as _db
+
+logger = logging.getLogger(__name__)
 from models.debate import DebateSession, DebateRound, LeonEvolution
 from models.flags import Flag, Severity
 from agents.leon import LeonAgent, LeonTextChunk, LeonChunk
@@ -67,6 +70,9 @@ async def run_debate(topic: str, session_id: str) -> AsyncGenerator[dict, None]:
 
         history.append({"role": "assistant", "content": leon_text})
 
+        if pending_leon is None:
+            logger.warning(f"[round {round_num}] LEON emitted no LeonChunk — SOPHIA will review empty recommendation")
+
         # SOPHIA round
         yield {"event": "round_start", "data": {"round": round_num, "agent": "sophia"}}
         sophia_text = ""
@@ -96,6 +102,12 @@ async def run_debate(topic: str, session_id: str) -> AsyncGenerator[dict, None]:
                 yield {"event": "quality_score", "data": {"score": chunk.quality_score}}
 
         history.append({"role": "user", "content": sophia_text})
+
+        if sophia_review is None and convergence_chunk is None:
+            raise RuntimeError(
+                f"[round {round_num}] SOPHIA emitted no SophiaReviewChunk or SophiaConvergenceChunk — "
+                "stream may be broken"
+            )
 
         # Save evolution snapshot and flags
         quality = (sophia_review.quality_score if sophia_review else

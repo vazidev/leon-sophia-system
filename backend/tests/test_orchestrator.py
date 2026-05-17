@@ -64,3 +64,10 @@ async def test_orchestrator_converges_after_two_rounds(tmp_path, monkeypatch):
     assert events[-1]["event"] == "convergence"
     assert events[-1]["data"]["qualityScore"] == 8.0
     assert events[-1]["data"]["finalRecommendation"] == "rec2"
+
+    # Verify event order: round_start:leon, token, round_start:sophia, ..., convergence last
+    round_start_events = [e for e in events if e["event"] == "round_start"]
+    assert round_start_events[0]["data"]["agent"] == "leon"
+    assert round_start_events[1]["data"]["agent"] == "sophia"
+    assert round_start_events[2]["data"]["agent"] == "leon"
+    assert round_start_events[3]["data"]["agent"] == "sophia"
