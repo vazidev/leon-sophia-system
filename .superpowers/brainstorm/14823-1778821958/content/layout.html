@@ -1,0 +1,82 @@
+<h2>How should LEON and SOPHIA's exchange be laid out?</h2>
+<p class="subtitle">This is the core visual structure — how the user sees their debate unfold.</p>
+
+<div class="cards">
+
+  <div class="card" data-choice="A" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#0d1117;padding:16px;border-radius:8px;font-family:monospace;font-size:11px;min-height:160px;">
+      <div style="display:flex;gap:12px;height:100%;">
+        <div style="flex:1;background:#161b22;border-radius:6px;padding:10px;border-left:3px solid #58a6ff;">
+          <div style="color:#58a6ff;font-weight:bold;font-size:10px;margin-bottom:6px;">⚙ LEON</div>
+          <div style="color:#8b949e;font-size:9px;line-height:1.5;">Draft plan round 1<br/>→ Option A proposed<br/>→ Evidence cited<br/>→ Risks mapped</div>
+          <div style="margin-top:8px;background:#1f2937;border-radius:4px;padding:6px;color:#8b949e;font-size:9px;">Round 2 revision...</div>
+        </div>
+        <div style="flex:1;background:#161b22;border-radius:6px;padding:10px;border-left:3px solid #f78166;">
+          <div style="color:#f78166;font-weight:bold;font-size:10px;margin-bottom:6px;">🔍 SOPHIA</div>
+          <div style="color:#8b949e;font-size:9px;line-height:1.5;">⚠ Bias flagged<br/>⛔ Assumption fails<br/>✓ Ethics cleared<br/>Score: 6.2/10</div>
+          <div style="margin-top:8px;background:#1f2937;border-radius:4px;padding:6px;color:#f78166;font-size:9px;">Deepening analysis...</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A — Side-by-Side Panels</h3>
+      <p>LEON and SOPHIA occupy permanent left/right columns. Each round of exchange is a new row. The debate scrolls downward as it deepens. Clear visual separation of the two minds at all times.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="B" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#0d1117;padding:16px;border-radius:8px;font-family:monospace;font-size:11px;min-height:160px;">
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <div style="background:#161b22;border-radius:6px;padding:8px;border-left:3px solid #58a6ff;display:flex;align-items:center;gap:8px;">
+          <span style="color:#58a6ff;font-size:10px;font-weight:bold;">⚙ LEON</span>
+          <span style="color:#8b949e;font-size:9px;">Round 1: Option A proposed with 3 supporting claims...</span>
+        </div>
+        <div style="background:#161b22;border-radius:6px;padding:8px;border-left:3px solid #f78166;display:flex;align-items:center;gap:8px;">
+          <span style="color:#f78166;font-size:10px;font-weight:bold;">🔍 SOPHIA</span>
+          <span style="color:#8b949e;font-size:9px;">⚠ Claim 2 fails evidence standard. Deepening...</span>
+        </div>
+        <div style="background:#161b22;border-radius:6px;padding:8px;border-left:3px solid #58a6ff;display:flex;align-items:center;gap:8px;">
+          <span style="color:#58a6ff;font-size:10px;font-weight:bold;">⚙ LEON</span>
+          <span style="color:#8b949e;font-size:9px;">Round 2: Revised with Tier B evidence. New angle explored...</span>
+        </div>
+        <div style="background:#161b22;border-radius:6px;padding:8px;border-left:3px solid #3fb950;display:flex;align-items:center;gap:8px;">
+          <span style="color:#3fb950;font-size:10px;font-weight:bold;">⚡ SYNTHESIS</span>
+          <span style="color:#8b949e;font-size:9px;">Convergence reached. Score: 8.4/10</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B — Chronological Thread</h3>
+      <p>The exchange reads like a conversation — LEON, then SOPHIA, then LEON again, alternating as they go deeper. Each message is a card in a vertical feed. A third card type marks Synthesis moments. The thread grows as analysis deepens.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="C" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#0d1117;padding:16px;border-radius:8px;font-family:monospace;font-size:11px;min-height:160px;">
+      <div style="display:flex;gap:10px;">
+        <div style="flex:1;background:#161b22;border-radius:6px;padding:10px;">
+          <div style="color:#e6edf3;font-size:10px;font-weight:bold;margin-bottom:8px;">THREAD</div>
+          <div style="color:#58a6ff;font-size:9px;padding:4px;background:#1f2937;border-radius:3px;margin-bottom:4px;">⚙ Round 1</div>
+          <div style="color:#f78166;font-size:9px;padding:4px;background:#1f2937;border-radius:3px;margin-bottom:4px;">🔍 Challenge</div>
+          <div style="color:#58a6ff;font-size:9px;padding:4px;background:#1f2937;border-radius:3px;margin-bottom:4px;border:1px solid #58a6ff;">⚙ Round 2 ◀</div>
+          <div style="color:#8b949e;font-size:9px;padding:4px;background:#1f2937;border-radius:3px;">🔍 Deepening</div>
+        </div>
+        <div style="flex:2;background:#161b22;border-radius:6px;padding:10px;">
+          <div style="color:#58a6ff;font-size:10px;font-weight:bold;margin-bottom:6px;">⚙ LEON — Round 2</div>
+          <div style="color:#8b949e;font-size:9px;line-height:1.6;">After SOPHIA's challenge on evidence, LEON expands the analysis to include analogous systems from three domains. New claim: X is supported by Tier B evidence from comparable architecture decisions in financial systems...</div>
+          <div style="margin-top:8px;display:flex;gap:6px;">
+            <span style="background:#1f2937;color:#3fb950;font-size:8px;padding:2px 6px;border-radius:3px;">DEEPENING</span>
+            <span style="background:#1f2937;color:#d29922;font-size:8px;padding:2px 6px;border-radius:3px;">2 open flags</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C — Timeline + Detail View</h3>
+      <p>A narrow left sidebar shows the round-by-round timeline. Clicking any round loads the full detail in the main panel. Like a code diff viewer — the history is always visible, but you're focused on one moment at a time. Best for long deep debates.</p>
+    </div>
+  </div>
+
+</div>
+
+<p class="subtitle" style="margin-top:16px;">Click your preferred layout — or describe what you're imagining in the terminal.</p>

@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LEON Evolution Panel</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', -apple-system, sans-serif; background: #f6f8fa; color: #1f2328; min-height: 100vh; }
+
+  .page-header {
+    background: #ffffff;
+    border-bottom: 1px solid #d0d7de;
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .page-header h2 { font-size: 15px; font-weight: 700; color: #1f2328; }
+  .page-header .sub { font-size: 12px; color: #57606a; }
+  .badge { font-size: 10px; padding: 2px 8px; border-radius: 10px; font-weight: 500; }
+  .badge.blue { background: #ddf4ff; color: #0969da; }
+  .badge.green { background: #dafbe1; color: #1a7f37; }
+
+  .layout { display: flex; gap: 16px; padding: 20px 24px; max-width: 1100px; }
+  .col-main { flex: 2; display: flex; flex-direction: column; gap: 14px; }
+  .col-side { flex: 1; display: flex; flex-direction: column; gap: 14px; }
+
+  .card {
+    background: #ffffff;
+    border: 1px solid #d0d7de;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .card-header {
+    padding: 10px 16px;
+    border-bottom: 1px solid #f6f8fa;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .card-header h3 { font-size: 12px; font-weight: 600; color: #1f2328; }
+  .card-header .hint { font-size: 11px; color: #57606a; margin-left: auto; }
+  .card-body { padding: 16px; }
+
+  /* ── Score Timeline Chart ── */
+  .chart-wrap {
+    position: relative;
+    height: 130px;
+    padding: 8px 0 24px 32px;
+  }
+  .chart-svg { width: 100%; height: 100%; overflow: visible; }
+
+  /* Y-axis labels */
+  .y-label { font-size: 9px; fill: #57606a; text-anchor: end; }
+  /* X-axis labels */
+  .x-label { font-size: 9px; fill: #57606a; text-anchor: middle; }
+
+  /* ── Position Diff View ── */
+  .diff-row {
+    display: flex;
+    gap: 0;
+    margin-bottom: 10px;
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid #d0d7de;
+    font-size: 12px;
+  }
+  .diff-round-tag {
+    background: #f6f8fa;
+    padding: 10px 10px;
+    font-size: 10px;
+    font-weight: 600;
+    color: #57606a;
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    transform: rotate(180deg);
+    border-right: 1px solid #d0d7de;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 28px;
+  }
+  .diff-content { padding: 10px 12px; flex: 1; line-height: 1.6; }
+  .diff-content .added { color: #1a7f37; background: #dafbe1; border-radius: 3px; padding: 0 3px; }
+  .diff-content .removed { color: #cf222e; background: #ffebe9; border-radius: 3px; padding: 0 3px; text-decoration: line-through; }
+  .diff-content .neutral { color: #57606a; }
+  .diff-meta { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
+
+  /* ── Scope Growth Map ── */
+  .scope-map {
+    position: relative;
+    height: 220px;
+    background: #f6f8fa;
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  .scope-map svg { width: 100%; height: 100%; }
+
+  /* ── Dimensions Radar ── */
+  .radar-wrap {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .radar-svg-wrap { flex-shrink: 0; }
+  .radar-legend { font-size: 11px; }
+  .legend-row { display: flex; align-items: center; gap: 6px; margin-bottom: 5px; }
+  .legend-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+  /* ── Evidence Growth ── */
+  .ev-bar-wrap { display: flex; flex-direction: column; gap: 8px; }
+  .ev-row { display: flex; align-items: center; gap: 8px; }
+  .ev-label { font-size: 11px; color: #57606a; width: 50px; flex-shrink: 0; text-align: right; }
+  .ev-track { flex: 1; background: #f6f8fa; border-radius: 3px; height: 16px; border: 1px solid #d0d7de; position: relative; overflow: hidden; }
+  .ev-fill { height: 100%; border-radius: 3px; transition: width 0.4s; display: flex; align-items: center; padding-left: 6px; }
+  .ev-fill-label { font-size: 9px; color: white; font-weight: 600; white-space: nowrap; }
+  .ev-count { font-size: 11px; color: #57606a; width: 28px; flex-shrink: 0; }
+
+  .chip { display: inline-flex; font-size: 10px; padding: 1px 6px; border-radius: 8px; font-weight: 500; }
+  .chip.blue { background: #ddf4ff; color: #0969da; }
+  .chip.green { background: #dafbe1; color: #1a7f37; }
+  .chip.yellow { background: #fff8c5; color: #9a6700; }
+  .chip.red { background: #ffebe9; color: #cf222e; }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <span style="font-size:18px;">⚙</span>
+  <div>
+    <h2>LEON Evolution</h2>
+    <div class="sub">How LEON's analysis grew across 4 rounds · "Migrate to streaming architecture?"</div>
+  </div>
+  <span class="badge blue" style="margin-left:auto;">4 rounds</span>
+  <span class="badge green">Converged 8.1</span>
+</div>
+
+<div class="layout">
+  <div class="col-main">
+
+    <!-- 1. Score Timeline -->
+    <div class="card">
+      <div class="card-header">
+        <span>📈</span>
+        <h3>Quality Score Across Rounds</h3>
+        <span class="hint">Target: 7.0 → converge</span>
+      </div>
+      <div class="card-body">
+        <div class="chart-wrap">
+          <svg class="chart-svg" viewBox="0 0 500 110" preserveAspectRatio="none">
+            <!-- grid lines -->
+            <line x1="0" y1="0"   x2="500" y2="0"   stroke="#f0f0f0" stroke-width="1"/>
+            <line x1="0" y1="27"  x2="500" y2="27"  stroke="#f0f0f0" stroke-width="1"/>
+            <line x1="0" y1="55"  x2="500" y2="55"  stroke="#f0f0f0" stroke-width="1"/>
+            <line x1="0" y1="82"  x2="500" y2="82"  stroke="#f0f0f0" stroke-width="1"/>
+            <line x1="0" y1="110" x2="500" y2="110" stroke="#d0d7de" stroke-width="1"/>
+            <!-- target line at 7.0 -->
+            <line x1="0" y1="33" x2="500" y2="33" stroke="#1a7f37" stroke-width="1" stroke-dasharray="6,4" opacity="0.6"/>
+            <text x="502" y="36" font-size="9" fill="#1a7f37">7.0</text>
+            <!-- Y axis labels: 10→0 maps to y 0→110 -->
+            <text class="y-label" x="-2" y="4">10</text>
+            <text class="y-label" x="-2" y="31">7</text>
+            <text class="y-label" x="-2" y="58">5</text>
+            <text class="y-label" x="-2" y="85">2</text>
+            <!-- Score area fill: R1=3.8, R2=6.2, R3=7.4, R4=8.1 -->
+            <!-- y = (10 - score) / 10 * 110 -->
+            <!-- R1 3.8 → y=68.2 at x=70 -->
+            <!-- R2 6.2 → y=41.8 at x=190 -->
+            <!-- R3 7.4 → y=28.6 at x=320 -->
+            <!-- R4 8.1 → y=20.9 at x=440 -->
+            <defs>
+              <linearGradient id="scoreGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#0969da" stop-opacity="0.2"/>
+                <stop offset="100%" stop-color="#0969da" stop-opacity="0.02"/>
+              </linearGradient>
+            </defs>
+            <polygon points="70,68 190,42 320,29 440,21 440,110 70,110" fill="url(#scoreGrad)"/>
+            <polyline points="70,68 190,42 320,29 440,21" fill="none" stroke="#0969da" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+            <!-- dots -->
+            <circle cx="70"  cy="68" r="5" fill="#0969da" stroke="white" stroke-width="2"/>
+            <circle cx="190" cy="42" r="5" fill="#0969da" stroke="white" stroke-width="2"/>
+            <circle cx="320" cy="29" r="5" fill="#0969da" stroke="white" stroke-width="2"/>
+            <circle cx="440" cy="21" r="6" fill="#1a7f37" stroke="white" stroke-width="2"/>
+            <!-- score labels -->
+            <text x="70"  y="60" font-size="10" fill="#0969da" text-anchor="middle" font-weight="600">3.8</text>
+            <text x="190" y="34" font-size="10" fill="#0969da" text-anchor="middle" font-weight="600">6.2</text>
+            <text x="320" y="21" font-size="10" fill="#0969da" text-anchor="middle" font-weight="600">7.4</text>
+            <text x="440" y="13" font-size="10" fill="#1a7f37" text-anchor="middle" font-weight="600">8.1 ✓</text>
+            <!-- x axis labels -->
+            <text class="x-label" x="70"  y="124" font-size="10" fill="#57606a" text-anchor="middle">R1</text>
+            <text class="x-label" x="190" y="124" font-size="10" fill="#57606a" text-anchor="middle">R2</text>
+            <text class="x-label" x="320" y="124" font-size="10" fill="#57606a" text-anchor="middle">R3</text>
+            <text class="x-label" x="440" y="124" font-size="10" fill="#1a7f37" font-weight="600" text-anchor="middle">R4 ✓</text>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. Position Evolution (Diff View) -->
+    <div class="card">
+      <div class="card-header">
+        <span>🔄</span>
+        <h3>Position Evolution — How the Recommendation Changed</h3>
+        <span class="hint">Green = added · Red = replaced</span>
+      </div>
+      <div class="card-body">
+
+        <div class="diff-row">
+          <div class="diff-round-tag" style="background:#ddf4ff;color:#0969da;">R1</div>
+          <div class="diff-content">
+            <span class="neutral">Migrate all pipelines to streaming. </span>
+            <span class="removed">Hard cutover in 4 weeks.</span>
+            <span class="neutral"> Expected 60% latency reduction.</span>
+            <div class="diff-meta">
+              <span class="chip blue">Initial</span>
+              <span class="chip red">2 blocking flags from SOPHIA</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="diff-row">
+          <div class="diff-round-tag" style="background:#ddf4ff;color:#0969da;">R2</div>
+          <div class="diff-content">
+            <span class="neutral">Migrate all pipelines to streaming. </span>
+            <span class="added">Phased by criticality.</span>
+            <span class="neutral"> Expected 60–70% latency reduction </span>
+            <span class="added">(Tier B evidence from 3 comparable cases).</span>
+            <div class="diff-meta">
+              <span class="chip blue">Expanded</span>
+              <span class="chip yellow">1 warning remains</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="diff-row">
+          <div class="diff-round-tag" style="background:#ddf4ff;color:#0969da;">R3</div>
+          <div class="diff-content">
+            <span class="neutral">Migrate all pipelines to streaming, phased by criticality. </span>
+            <span class="added">Dual-write transition period of 6–8 weeks eliminates operational risk.</span>
+            <span class="neutral"> Expected 60–70% latency reduction (Tier B). </span>
+            <span class="added">Rollback probability reduced from 35% to &lt;8%.</span>
+            <div class="diff-meta">
+              <span class="chip blue">Deepened</span>
+              <span class="chip yellow">Advisory open</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="diff-row" style="border-color:#4ac26b;">
+          <div class="diff-round-tag" style="background:#dafbe1;color:#1a7f37;">R4 ✓</div>
+          <div class="diff-content">
+            <span class="neutral">Migrate all pipelines to streaming, phased by criticality, using dual-write transition (6–8 wks). </span>
+            <span class="added">Begin Wave 1 with 2–3 lowest-criticality pipelines. Each wave requires a 2-week stability window before cutover.</span>
+            <div class="diff-meta">
+              <span class="chip green">✓ Converged</span>
+              <span class="chip green">Score 8.1</span>
+              <span class="chip yellow">1 advisory open</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- 3. Scope Growth Map -->
+    <div class="card">
+      <div class="card-header">
+        <span>🌐</span>
+        <h3>Analysis Scope Growth — Topics LEON Expanded Into</h3>
+        <span class="hint">Nodes grow as LEON deepens</span>
+      </div>
+      <div class="card-body" style="padding:8px;">
+        <div class="scope-map">
+          <svg viewBox="0 0 560 220" preserveAspectRatio="xMidYMid meet">
+            <!-- connection lines -->
+            <line x1="280" y1="110" x2="140" y2="60"  stroke="#d0d7de" stroke-width="1.5"/>
+            <line x1="280" y1="110" x2="420" y2="60"  stroke="#d0d7de" stroke-width="1.5"/>
+            <line x1="280" y1="110" x2="130" y2="160" stroke="#d0d7de" stroke-width="1.5"/>
+            <line x1="280" y1="110" x2="420" y2="160" stroke="#d0d7de" stroke-width="1.5"/>
+            <line x1="140" y1="60"  x2="60"  y2="30"  stroke="#d0d7de" stroke-width="1" stroke-dasharray="4,3"/>
+            <line x1="140" y1="60"  x2="80"  y2="100" stroke="#d0d7de" stroke-width="1" stroke-dasharray="4,3"/>
+            <line x1="420" y1="60"  x2="490" y2="30"  stroke="#d0d7de" stroke-width="1" stroke-dasharray="4,3"/>
+            <line x1="420" y1="60"  x2="500" y2="90"  stroke="#d0d7de" stroke-width="1" stroke-dasharray="4,3"/>
+            <line x1="130" y1="160" x2="60"  y2="190" stroke="#d0d7de" stroke-width="1" stroke-dasharray="4,3"/>
+            <line x1="420" y1="160" x2="490" y2="190" stroke="#d0d7de" stroke-width="1" stroke-dasharray="4,3"/>
+            <line x1="420" y1="160" x2="500" y2="150" stroke="#d0d7de" stroke-width="1" stroke-dasharray="4,3"/>
+
+            <!-- Root node — R1 -->
+            <circle cx="280" cy="110" r="32" fill="#0969da" opacity="0.9"/>
+            <text x="280" y="106" font-size="10" fill="white" text-anchor="middle" font-weight="600">Streaming</text>
+            <text x="280" y="119" font-size="10" fill="white" text-anchor="middle" font-weight="600">Migration</text>
+            <text x="280" y="132" font-size="8" fill="#ddf4ff" text-anchor="middle">R1 · core</text>
+
+            <!-- R1 branches -->
+            <circle cx="140" cy="60" r="22" fill="#0969da" opacity="0.75"/>
+            <text x="140" y="56" font-size="9" fill="white" text-anchor="middle" font-weight="600">Latency</text>
+            <text x="140" y="68" font-size="9" fill="white" text-anchor="middle" font-weight="600">Gains</text>
+            <text x="140" y="79" font-size="7" fill="#ddf4ff" text-anchor="middle">R1</text>
+
+            <circle cx="420" cy="60" r="22" fill="#0969da" opacity="0.75"/>
+            <text x="420" y="56" font-size="9" fill="white" text-anchor="middle" font-weight="600">Cutover</text>
+            <text x="420" y="68" font-size="9" fill="white" text-anchor="middle" font-weight="600">Strategy</text>
+            <text x="420" y="79" font-size="7" fill="#ddf4ff" text-anchor="middle">R1 → R2</text>
+
+            <circle cx="130" cy="160" r="22" fill="#0969da" opacity="0.75"/>
+            <text x="130" y="156" font-size="9" fill="white" text-anchor="middle" font-weight="600">Operational</text>
+            <text x="130" y="168" font-size="9" fill="white" text-anchor="middle" font-weight="600">Complexity</text>
+            <text x="130" y="179" font-size="7" fill="#ddf4ff" text-anchor="middle">R2 · SOPHIA flag</text>
+
+            <circle cx="420" cy="160" r="22" fill="#0969da" opacity="0.75"/>
+            <text x="420" y="156" font-size="9" fill="white" text-anchor="middle" font-weight="600">Risk &amp;</text>
+            <text x="420" y="168" font-size="9" fill="white" text-anchor="middle" font-weight="600">Rollback</text>
+            <text x="420" y="179" font-size="7" fill="#ddf4ff" text-anchor="middle">R2 → R3</text>
+
+            <!-- R2/R3 deep branches -->
+            <circle cx="60"  cy="30"  r="16" fill="#0969da" opacity="0.5"/>
+            <text x="60"  y="26"  font-size="8" fill="white" text-anchor="middle">Financial</text>
+            <text x="60"  y="36"  font-size="8" fill="white" text-anchor="middle">Sector Cases</text>
+            <text x="60"  y="46"  font-size="7" fill="#ddf4ff" text-anchor="middle">R2 · TierB</text>
+
+            <circle cx="80"  cy="100" r="16" fill="#0969da" opacity="0.5"/>
+            <text x="80"  y="96"  font-size="8" fill="white" text-anchor="middle">Team Size</text>
+            <text x="80"  y="106" font-size="8" fill="white" text-anchor="middle">Benchmarks</text>
+            <text x="80"  y="116" font-size="7" fill="#ddf4ff" text-anchor="middle">R2</text>
+
+            <circle cx="490" cy="30"  r="16" fill="#0969da" opacity="0.5"/>
+            <text x="490" y="26"  font-size="8" fill="white" text-anchor="middle">Dual-Write</text>
+            <text x="490" y="36"  font-size="8" fill="white" text-anchor="middle">Pattern</text>
+            <text x="490" y="46"  font-size="7" fill="#ddf4ff" text-anchor="middle">R3 · new</text>
+
+            <circle cx="500" cy="90"  r="16" fill="#0969da" opacity="0.5"/>
+            <text x="500" y="86"  font-size="8" fill="white" text-anchor="middle">Stability</text>
+            <text x="500" y="96"  font-size="8" fill="white" text-anchor="middle">Windows</text>
+            <text x="500" y="106" font-size="7" fill="#ddf4ff" text-anchor="middle">R3</text>
+
+            <circle cx="60"  cy="190" r="16" fill="#0969da" opacity="0.5"/>
+            <text x="60"  y="186" font-size="8" fill="white" text-anchor="middle">Wave 1</text>
+            <text x="60"  y="196" font-size="8" fill="white" text-anchor="middle">Pipelines</text>
+            <text x="60"  y="206" font-size="7" fill="#ddf4ff" text-anchor="middle">R4</text>
+
+            <circle cx="490" cy="190" r="16" fill="#0969da" opacity="0.5"/>
+            <text x="490" y="186" font-size="8" fill="white" text-anchor="middle">Rollback</text>
+            <text x="490" y="196" font-size="8" fill="white" text-anchor="middle">Cost</text>
+            <text x="490" y="206" font-size="7" fill="#fff8c5" text-anchor="middle">⚠ Open</text>
+
+            <circle cx="500" cy="150" r="16" fill="#1a7f37" opacity="0.7"/>
+            <text x="500" y="146" font-size="8" fill="white" text-anchor="middle">Phased</text>
+            <text x="500" y="156" font-size="8" fill="white" text-anchor="middle">Cutover</text>
+            <text x="500" y="166" font-size="7" fill="#dafbe1" text-anchor="middle">R4 ✓</text>
+
+            <!-- Legend -->
+            <circle cx="20" cy="210" r="6" fill="#0969da" opacity="0.9"/>
+            <text x="30" y="214" font-size="9" fill="#57606a">Core topic</text>
+            <circle cx="100" cy="210" r="6" fill="#0969da" opacity="0.5"/>
+            <text x="110" y="214" font-size="9" fill="#57606a">Expanded topic</text>
+            <circle cx="200" cy="210" r="6" fill="#1a7f37" opacity="0.7"/>
+            <text x="210" y="214" font-size="9" fill="#57606a">Resolved ✓</text>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="col-side">
+
+    <!-- Evidence Growth -->
+    <div class="card">
+      <div class="card-header">
+        <span>📚</span>
+        <h3>Evidence Growth by Round</h3>
+      </div>
+      <div class="card-body">
+        <div class="ev-bar-wrap">
+          <div class="ev-row">
+            <div class="ev-label">R1</div>
+            <div class="ev-track">
+              <div class="ev-fill" style="width:18%;background:#0969da;">
+                <span class="ev-fill-label">2</span>
+              </div>
+            </div>
+            <div class="ev-count">2</div>
+          </div>
+          <div class="ev-row">
+            <div class="ev-label">R2</div>
+            <div class="ev-track">
+              <div class="ev-fill" style="width:54%;background:#0969da;">
+                <span class="ev-fill-label">6</span>
+              </div>
+            </div>
+            <div class="ev-count">6</div>
+          </div>
+          <div class="ev-row">
+            <div class="ev-label">R3</div>
+            <div class="ev-track">
+              <div class="ev-fill" style="width:72%;background:#0969da;">
+                <span class="ev-fill-label">8</span>
+              </div>
+            </div>
+            <div class="ev-count">8</div>
+          </div>
+          <div class="ev-row">
+            <div class="ev-label">R4 ✓</div>
+            <div class="ev-track">
+              <div class="ev-fill" style="width:100%;background:#1a7f37;">
+                <span class="ev-fill-label">11 pieces</span>
+              </div>
+            </div>
+            <div class="ev-count">11</div>
+          </div>
+        </div>
+        <div style="margin-top:10px;font-size:11px;color:#57606a;">SOPHIA forced 3 evidence upgrades across rounds. All key claims now Tier B or above.</div>
+      </div>
+    </div>
+
+    <!-- Dimensions Radar -->
+    <div class="card">
+      <div class="card-header">
+        <span>🕸️</span>
+        <h3>Analysis Dimensions</h3>
+        <span class="hint">R1 vs R4</span>
+      </div>
+      <div class="card-body">
+        <div class="radar-wrap">
+          <div class="radar-svg-wrap">
+            <svg viewBox="0 0 140 140" width="140" height="140">
+              <!-- pentagon grid at 20%, 40%, 60%, 80%, 100% -->
+              <!-- 5 axes: Evidence, Scope, Confidence, Risk, Specificity -->
+              <!-- angles: 270°, 342°, 54°, 126°, 198° (top, then clockwise) -->
+              <!-- center: 70,70 radius 55 -->
+              <defs>
+                <polygon id="hex5-20" points="70,59 80.4,63.8 80.4,74.2 70,79 59.6,74.2 59.6,63.8"/>
+              </defs>
+              <!-- grid polygons -->
+              <polygon points="70,15 119.4,38.5 119.4,91.5 70,115 20.6,91.5 20.6,38.5" fill="none" stroke="#e1e4e8" stroke-width="1"/>
+              <polygon points="70,26 108.3,45.2 108.3,84.8 70,104 31.7,84.8 31.7,45.2" fill="none" stroke="#e1e4e8" stroke-width="1"/>
+              <polygon points="70,37 97.2,51.9 97.2,78.1 70,93 42.8,78.1 42.8,51.9" fill="none" stroke="#e1e4e8" stroke-width="1"/>
+              <polygon points="70,48 86.1,58.6 86.1,71.4 70,82 53.9,71.4 53.9,58.6" fill="none" stroke="#e1e4e8" stroke-width="1"/>
+              <!-- axes -->
+              <line x1="70" y1="70" x2="70"  y2="15"  stroke="#d0d7de" stroke-width="1"/>
+              <line x1="70" y1="70" x2="119.4" y2="38.5" stroke="#d0d7de" stroke-width="1"/>
+              <line x1="70" y1="70" x2="119.4" y2="91.5" stroke="#d0d7de" stroke-width="1"/>
+              <line x1="70" y1="70" x2="70"  y2="115" stroke="#d0d7de" stroke-width="1"/>
+              <line x1="70" y1="70" x2="20.6" y2="91.5" stroke="#d0d7de" stroke-width="1"/>
+              <line x1="70" y1="70" x2="20.6" y2="38.5" stroke="#d0d7de" stroke-width="1"/>
+              <!-- R1 polygon (low scores ~30%) -->
+              <!-- Evidence:25%, Scope:30%, Confidence:20%, Risk:15%, Specificity:30% -->
+              <polygon
+                points="70,56.5 77.7,65.4 77,73.2 70,80.8 62.5,73.6 62.8,65"
+                fill="#0969da" fill-opacity="0.15" stroke="#0969da" stroke-width="1.5" stroke-dasharray="4,2"/>
+              <!-- R4 polygon (high scores ~75-90%) -->
+              <!-- Evidence:85%, Scope:80%, Confidence:90%, Risk:75%, Specificity:85% -->
+              <polygon
+                points="70,25.3 109.8,42.7 108.3,85.4 70,105.5 30.8,85.4 31.2,42.3"
+                fill="#1a7f37" fill-opacity="0.15" stroke="#1a7f37" stroke-width="2"/>
+              <!-- axis labels -->
+              <text x="70"  y="10"  font-size="9" fill="#57606a" text-anchor="middle">Evidence</text>
+              <text x="126" y="36"  font-size="9" fill="#57606a" text-anchor="start">Scope</text>
+              <text x="126" y="96"  font-size="9" fill="#57606a" text-anchor="start">Risk</text>
+              <text x="70"  y="125" font-size="9" fill="#57606a" text-anchor="middle">Specificity</text>
+              <text x="14"  y="96"  font-size="9" fill="#57606a" text-anchor="end">Depth</text>
+              <text x="14"  y="36"  font-size="9" fill="#57606a" text-anchor="end">Confidence</text>
+            </svg>
+          </div>
+          <div class="radar-legend">
+            <div class="legend-row"><div class="legend-dot" style="background:#0969da;opacity:0.7;border:1.5px dashed #0969da;"></div><span style="color:#57606a;">Round 1</span></div>
+            <div class="legend-row"><div class="legend-dot" style="background:#1a7f37;"></div><span style="color:#1a7f37;font-weight:600;">Round 4 ✓</span></div>
+            <div style="margin-top:8px;font-size:10px;color:#57606a;line-height:1.5;">All 6 dimensions grew significantly. Confidence biggest jump (R1→R4: 2→9).</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Flags Resolved -->
+    <div class="card">
+      <div class="card-header">
+        <span>🚩</span>
+        <h3>SOPHIA Flags — Lifecycle</h3>
+      </div>
+      <div class="card-body" style="font-size:12px;">
+        <div style="display:flex;flex-direction:column;gap:7px;">
+          <div style="display:flex;align-items:center;gap:8px;padding:7px;background:#dafbe1;border-radius:5px;">
+            <span style="color:#1a7f37;font-size:14px;">✓</span>
+            <div style="flex:1;"><strong>Hard cutover timeline</strong><div style="font-size:10px;color:#57606a;">BLOCKING · Resolved R2 · Phased approach adopted</div></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;padding:7px;background:#dafbe1;border-radius:5px;">
+            <span style="color:#1a7f37;font-size:14px;">✓</span>
+            <div style="flex:1;"><strong>Planning fallacy on timeline</strong><div style="font-size:10px;color:#57606a;">BLOCKING · Resolved R2 · Tier B benchmarks added</div></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;padding:7px;background:#dafbe1;border-radius:5px;">
+            <span style="color:#1a7f37;font-size:14px;">✓</span>
+            <div style="flex:1;"><strong>Operational complexity</strong><div style="font-size:10px;color:#57606a;">WARNING · Resolved R3 · Dual-write model added</div></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;padding:7px;background:#fff8c5;border-radius:5px;border:1px solid #d4a72c44;">
+            <span style="color:#9a6700;font-size:14px;">⚠</span>
+            <div style="flex:1;"><strong>Rollback cost unmodeled</strong><div style="font-size:10px;color:#9a6700;">ADVISORY · Open · Resolve within 2 weeks</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>

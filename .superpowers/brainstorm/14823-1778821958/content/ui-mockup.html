@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LEON–SOPHIA UI Mockup</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', -apple-system, sans-serif; background: #f6f8fa; color: #1f2328; height: 100vh; display: flex; flex-direction: column; }
+
+  /* Top bar */
+  .topbar {
+    background: #ffffff;
+    border-bottom: 1px solid #d0d7de;
+    padding: 0 20px;
+    height: 52px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-shrink: 0;
+  }
+  .topbar-logo { font-weight: 700; font-size: 15px; color: #1f2328; letter-spacing: -0.3px; }
+  .topbar-logo span { color: #0969da; }
+  .topbar-topic {
+    flex: 1;
+    background: #f6f8fa;
+    border: 1px solid #d0d7de;
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 13px;
+    color: #57606a;
+  }
+  .topbar-status {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: #57606a;
+  }
+  .status-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: #d29922;
+    animation: pulse 1.4s ease-in-out infinite;
+  }
+  .status-dot.converged { background: #1a7f37; animation: none; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+  /* Main layout */
+  .main { display: flex; flex: 1; overflow: hidden; }
+
+  /* Sidebar */
+  .sidebar {
+    width: 220px;
+    background: #ffffff;
+    border-right: 1px solid #d0d7de;
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    overflow-y: auto;
+  }
+  .sidebar-header {
+    padding: 12px 14px 8px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: #57606a;
+    border-bottom: 1px solid #f6f8fa;
+  }
+  .round-entry {
+    padding: 10px 14px;
+    border-bottom: 1px solid #f6f8fa;
+    cursor: pointer;
+    transition: background 0.12s;
+    border-left: 3px solid transparent;
+  }
+  .round-entry:hover { background: #f6f8fa; }
+  .round-entry.active { background: #ddf4ff; border-left-color: #0969da; }
+  .round-entry.leon { border-left-color: #0969da; }
+  .round-entry.sophia { border-left-color: #cf222e; }
+  .round-entry.convergence { border-left-color: #1a7f37; background: #dafbe1; }
+  .round-entry.streaming { border-left-color: #d29922; }
+  .round-label {
+    font-size: 11px;
+    font-weight: 600;
+    margin-bottom: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .round-label.leon { color: #0969da; }
+  .round-label.sophia { color: #cf222e; }
+  .round-label.convergence { color: #1a7f37; }
+  .round-label.streaming { color: #d29922; }
+  .round-sub { font-size: 10px; color: #57606a; line-height: 1.4; }
+  .badge {
+    font-size: 9px;
+    padding: 1px 5px;
+    border-radius: 8px;
+    font-weight: 500;
+  }
+  .badge.flag { background: #fff8c5; color: #9a6700; }
+  .badge.blocking { background: #ffebe9; color: #cf222e; }
+  .badge.clear { background: #dafbe1; color: #1a7f37; }
+  .badge.score { background: #ddf4ff; color: #0969da; }
+  .badge.streaming { background: #fff8c5; color: #9a6700; }
+
+  .depth-bar {
+    margin: 10px 14px;
+    padding: 8px 10px;
+    background: #f6f8fa;
+    border-radius: 6px;
+    border: 1px solid #d0d7de;
+  }
+  .depth-label { font-size: 10px; color: #57606a; margin-bottom: 4px; }
+  .depth-track { background: #d0d7de; border-radius: 3px; height: 4px; }
+  .depth-fill { background: #0969da; height: 4px; border-radius: 3px; width: 62%; transition: width 0.4s; }
+
+  /* Detail panel */
+  .detail {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .detail-header {
+    padding: 14px 24px 12px;
+    background: #ffffff;
+    border-bottom: 1px solid #d0d7de;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+  .agent-chip {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 4px 12px;
+    border-radius: 20px;
+  }
+  .agent-chip.leon { background: #ddf4ff; color: #0969da; }
+  .agent-chip.sophia { background: #ffebe9; color: #cf222e; }
+  .round-meta { font-size: 12px; color: #57606a; }
+
+  .detail-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px 24px;
+  }
+
+  .content-block {
+    background: #ffffff;
+    border: 1px solid #d0d7de;
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin-bottom: 14px;
+    line-height: 1.7;
+    font-size: 13.5px;
+    color: #1f2328;
+  }
+  .content-block h4 {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.7px;
+    color: #57606a;
+    margin-bottom: 8px;
+    font-weight: 600;
+  }
+  .inline-flag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: #fff8c5;
+    border: 1px solid #d4a72c44;
+    color: #9a6700;
+    font-size: 11px;
+    padding: 1px 7px;
+    border-radius: 4px;
+    margin: 0 2px;
+    cursor: pointer;
+    font-weight: 500;
+  }
+  .inline-flag.blocking { background: #ffebe9; border-color: #ff818266; color: #cf222e; }
+  .inline-flag.resolved { background: #dafbe1; border-color: #4ac26b44; color: #1a7f37; }
+
+  .flags-panel {
+    background: #ffffff;
+    border: 1px solid #d0d7de;
+    border-radius: 8px;
+    padding: 14px 20px;
+    margin-bottom: 14px;
+  }
+  .flags-panel h4 {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.7px;
+    color: #57606a;
+    margin-bottom: 10px;
+    font-weight: 600;
+  }
+  .flag-item {
+    display: flex;
+    gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid #f6f8fa;
+    font-size: 12px;
+  }
+  .flag-item:last-child { border-bottom: none; }
+  .flag-sev {
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 4px;
+    flex-shrink: 0;
+    height: fit-content;
+    margin-top: 1px;
+  }
+  .flag-sev.blocking { background: #ffebe9; color: #cf222e; }
+  .flag-sev.warning { background: #fff8c5; color: #9a6700; }
+  .flag-sev.advisory { background: #ddf4ff; color: #0969da; }
+  .flag-text { color: #1f2328; line-height: 1.5; }
+  .flag-resolution { color: #57606a; font-size: 11px; margin-top: 3px; }
+
+  .score-bar-wrap {
+    background: #ffffff;
+    border: 1px solid #d0d7de;
+    border-radius: 8px;
+    padding: 14px 20px;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .score-num { font-size: 28px; font-weight: 700; color: #d29922; }
+  .score-num.good { color: #1a7f37; }
+  .score-info { flex: 1; }
+  .score-info-label { font-size: 11px; color: #57606a; margin-bottom: 4px; }
+  .score-track { background: #d0d7de; border-radius: 3px; height: 6px; }
+  .score-fill { height: 6px; border-radius: 3px; background: linear-gradient(90deg, #d29922, #1a7f37); width: 62%; }
+
+  /* Input bar */
+  .input-bar {
+    padding: 12px 20px;
+    background: #ffffff;
+    border-top: 1px solid #d0d7de;
+    display: flex;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+  .input-field {
+    flex: 1;
+    border: 1px solid #d0d7de;
+    border-radius: 6px;
+    padding: 8px 14px;
+    font-size: 13px;
+    color: #57606a;
+    background: #f6f8fa;
+  }
+  .btn-start {
+    background: #0969da;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 18px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+  }
+  .streaming-cursor {
+    display: inline-block;
+    width: 2px;
+    height: 14px;
+    background: #0969da;
+    margin-left: 2px;
+    animation: blink 1s step-end infinite;
+    vertical-align: text-bottom;
+  }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+</style>
+</head>
+<body>
+
+<!-- Top bar -->
+<div class="topbar">
+  <div class="topbar-logo"><span>LEON</span> · SOPHIA</div>
+  <div class="topbar-topic">Should we migrate our data pipeline to a streaming architecture?</div>
+  <div class="topbar-status">
+    <div class="status-dot"></div>
+    Debating · Round 3 · Deepening
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- Sidebar: Timeline -->
+  <div class="sidebar">
+    <div class="sidebar-header">Timeline</div>
+
+    <!-- Depth indicator -->
+    <div class="depth-bar">
+      <div class="depth-label">Analysis depth</div>
+      <div class="depth-track"><div class="depth-fill"></div></div>
+      <div style="font-size:9px;color:#57606a;margin-top:3px;">Round 3 of ∞ · Converging</div>
+    </div>
+
+    <div class="round-entry leon">
+      <div class="round-label leon">⚙ LEON <span class="badge score">R1</span></div>
+      <div class="round-sub">Initial plan · Migration strategy proposed</div>
+    </div>
+    <div class="round-entry sophia">
+      <div class="round-label sophia">🔍 SOPHIA <span class="badge blocking">2 blocking</span></div>
+      <div class="round-sub">Evidence gaps · Planning fallacy detected</div>
+    </div>
+    <div class="round-entry leon">
+      <div class="round-label leon">⚙ LEON <span class="badge score">R2</span></div>
+      <div class="round-sub">Expanded · Tier B evidence added</div>
+    </div>
+    <div class="round-entry sophia">
+      <div class="round-label sophia">🔍 SOPHIA <span class="badge flag">1 warning</span></div>
+      <div class="round-sub">Score 6.2 · One flag remains</div>
+    </div>
+    <div class="round-entry leon active streaming">
+      <div class="round-label streaming">⚙ LEON <span class="badge streaming">Streaming…</span></div>
+      <div class="round-sub">Round 3 · Deeper analysis in progress</div>
+    </div>
+  </div>
+
+  <!-- Detail panel -->
+  <div class="detail">
+    <div class="detail-header">
+      <div class="agent-chip leon">⚙ LEON</div>
+      <div class="round-meta">Round 3 · Expanding analysis in response to SOPHIA's residual flag</div>
+    </div>
+
+    <div class="detail-body">
+
+      <!-- Score bar -->
+      <div class="score-bar-wrap">
+        <div class="score-num">6.2</div>
+        <div class="score-info">
+          <div class="score-info-label">Decision quality · Target 7.0 to converge</div>
+          <div class="score-track"><div class="score-fill"></div></div>
+        </div>
+        <div style="font-size:11px;color:#57606a;text-align:right;">
+          <div>1 flag open</div>
+          <div style="color:#1a7f37;margin-top:2px;">Ethics ✓ cleared</div>
+        </div>
+      </div>
+
+      <!-- Main content — streaming -->
+      <div class="content-block">
+        <h4>LEON · Analysis — Round 3</h4>
+        SOPHIA's residual flag on operational complexity forced a deeper look at comparable migrations. I examined three financial-sector data pipelines that completed streaming migrations between 2021–2023 — all with team sizes within ±30% of ours.<br><br>
+        The critical finding: in 2 of 3 cases, the planning fallacy SOPHIA identified in Round 1 was addressed not by reducing scope, but by <span class="inline-flag resolved">✓ phased cutover</span> rather than a hard switchover. This resolves the complexity concern without reducing the migration's strategic value.<br><br>
+        Revised recommendation: proceed with streaming migration using a <strong>dual-write transition period</strong> of 6–8 weeks. This eliminates the operational risk SOPHIA flagged while preserving the full performance gain. Tier B evidence from the financial-sector cases directly supports this <span class="inline-flag">⚠ estimate confidence</span> on the 6–8 week window...<span class="streaming-cursor"></span>
+      </div>
+
+      <!-- Flags from prior SOPHIA round -->
+      <div class="flags-panel">
+        <h4>SOPHIA Flags — Round 2 (informing this round)</h4>
+        <div class="flag-item">
+          <div class="flag-sev warning">WARNING</div>
+          <div>
+            <div class="flag-text">Operational complexity estimate lacks comparable reference. "Our team can handle this in 6–8 weeks" has no analogous case cited.</div>
+            <div class="flag-resolution">→ LEON addressing this in Round 3</div>
+          </div>
+        </div>
+        <div class="flag-item">
+          <div class="flag-sev advisory">ADVISORY</div>
+          <div>
+            <div class="flag-text">Rollback plan is described but not costed. Reversibility score is low.</div>
+            <div class="flag-resolution">→ Open — awaiting LEON response</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Input bar -->
+    <div class="input-bar">
+      <input class="input-field" type="text" value="Should we migrate our data pipeline to a streaming architecture?" readonly />
+      <button class="btn-start">New Debate</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// Inject a helper script stub so the frame doesn't error if loaded standalone
+</script>
+</body>
+</html>

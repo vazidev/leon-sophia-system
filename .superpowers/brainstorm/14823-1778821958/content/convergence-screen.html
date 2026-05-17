@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LEON–SOPHIA · Convergence Screen</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', -apple-system, sans-serif; background: #f6f8fa; color: #1f2328; height: 100vh; display: flex; flex-direction: column; }
+
+  .topbar {
+    background: #ffffff;
+    border-bottom: 1px solid #d0d7de;
+    padding: 0 20px;
+    height: 52px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-shrink: 0;
+  }
+  .topbar-logo { font-weight: 700; font-size: 15px; color: #1f2328; letter-spacing: -0.3px; }
+  .topbar-logo span { color: #0969da; }
+  .topbar-topic {
+    flex: 1;
+    background: #f6f8fa;
+    border: 1px solid #d0d7de;
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 13px;
+    color: #57606a;
+  }
+  .topbar-status {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #1a7f37;
+    background: #dafbe1;
+    padding: 4px 12px;
+    border-radius: 20px;
+    border: 1px solid #4ac26b44;
+  }
+
+  .main { display: flex; flex: 1; overflow: hidden; }
+
+  .sidebar {
+    width: 220px;
+    background: #ffffff;
+    border-right: 1px solid #d0d7de;
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    overflow-y: auto;
+  }
+  .sidebar-header {
+    padding: 12px 14px 8px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: #57606a;
+    border-bottom: 1px solid #f6f8fa;
+  }
+  .depth-bar {
+    margin: 10px 14px;
+    padding: 8px 10px;
+    background: #dafbe1;
+    border-radius: 6px;
+    border: 1px solid #4ac26b44;
+  }
+  .depth-label { font-size: 10px; color: #1a7f37; font-weight: 600; margin-bottom: 4px; }
+  .depth-track { background: #d0d7de; border-radius: 3px; height: 4px; }
+  .depth-fill { background: #1a7f37; height: 4px; border-radius: 3px; width: 100%; }
+
+  .round-entry {
+    padding: 10px 14px;
+    border-bottom: 1px solid #f6f8fa;
+    cursor: pointer;
+    border-left: 3px solid transparent;
+  }
+  .round-entry.leon { border-left-color: #0969da; }
+  .round-entry.sophia { border-left-color: #cf222e; }
+  .round-entry.synthesis { border-left-color: #1a7f37; background: #dafbe1; }
+  .round-entry.active { background: #ddf4ff; border-left-color: #0969da; }
+  .round-label { font-size: 11px; font-weight: 600; margin-bottom: 2px; display: flex; align-items: center; justify-content: space-between; }
+  .round-label.leon { color: #0969da; }
+  .round-label.sophia { color: #cf222e; }
+  .round-label.synthesis { color: #1a7f37; }
+  .round-sub { font-size: 10px; color: #57606a; line-height: 1.4; }
+  .badge { font-size: 9px; padding: 1px 5px; border-radius: 8px; font-weight: 500; }
+  .badge.clear { background: #dafbe1; color: #1a7f37; }
+  .badge.score { background: #ddf4ff; color: #0969da; }
+  .badge.high { background: #dafbe1; color: #1a7f37; }
+
+  .detail { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+  .convergence-banner {
+    background: linear-gradient(135deg, #dafbe1 0%, #f0fff4 100%);
+    border-bottom: 2px solid #4ac26b;
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-shrink: 0;
+  }
+  .convergence-icon { font-size: 24px; }
+  .convergence-title { font-size: 15px; font-weight: 700; color: #1a7f37; }
+  .convergence-sub { font-size: 12px; color: #57606a; margin-top: 2px; }
+  .convergence-meta { margin-left: auto; text-align: right; }
+  .score-big { font-size: 26px; font-weight: 700; color: #1a7f37; line-height: 1; }
+  .score-big-label { font-size: 10px; color: #57606a; }
+
+  .detail-body { flex: 1; overflow-y: auto; padding: 20px 24px; display: flex; flex-direction: column; gap: 14px; }
+
+  .section-card {
+    background: #ffffff;
+    border: 1px solid #d0d7de;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .section-card-header {
+    padding: 10px 16px;
+    border-bottom: 1px solid #f6f8fa;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section-card-header .icon { font-size: 14px; }
+  .section-card-header h3 { font-size: 13px; font-weight: 600; color: #1f2328; }
+  .section-card-header .sub { font-size: 11px; color: #57606a; margin-left: auto; }
+  .section-card-body { padding: 14px 16px; font-size: 13px; line-height: 1.7; color: #1f2328; }
+
+  /* Decision section */
+  .decision-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+    align-items: flex-start;
+  }
+  .decision-label {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: #57606a;
+    min-width: 90px;
+    padding-top: 2px;
+  }
+  .decision-value { font-size: 13px; color: #1f2328; flex: 1; }
+  .chip { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; padding: 2px 8px; border-radius: 10px; font-weight: 500; margin-right: 4px; }
+  .chip.green { background: #dafbe1; color: #1a7f37; }
+  .chip.blue { background: #ddf4ff; color: #0969da; }
+  .chip.yellow { background: #fff8c5; color: #9a6700; }
+
+  /* Guide section */
+  .guide-step {
+    display: flex;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid #f6f8fa;
+  }
+  .guide-step:last-child { border-bottom: none; }
+  .step-num {
+    width: 22px; height: 22px;
+    background: #0969da;
+    color: white;
+    border-radius: 50%;
+    font-size: 11px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .step-content { flex: 1; }
+  .step-title { font-size: 13px; font-weight: 600; color: #1f2328; margin-bottom: 2px; }
+  .step-desc { font-size: 12px; color: #57606a; line-height: 1.5; }
+  .step-meta { display: flex; gap: 6px; margin-top: 5px; }
+
+  /* Predicted outcome section */
+  .outcome-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  .outcome-metric {
+    background: #f6f8fa;
+    border: 1px solid #d0d7de;
+    border-radius: 6px;
+    padding: 10px 12px;
+    text-align: center;
+  }
+  .metric-val { font-size: 20px; font-weight: 700; color: #0969da; line-height: 1.2; }
+  .metric-label { font-size: 10px; color: #57606a; margin-top: 3px; }
+  .metric-conf { font-size: 9px; color: #1a7f37; margin-top: 2px; }
+
+  .outcome-timeline {
+    display: flex;
+    gap: 0;
+    position: relative;
+    padding: 8px 0;
+  }
+  .outcome-timeline::before {
+    content: '';
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    right: 20px;
+    height: 2px;
+    background: #d0d7de;
+  }
+  .ot-node {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+  }
+  .ot-dot {
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    background: #d0d7de;
+    border: 2px solid white;
+    margin-bottom: 6px;
+    position: relative;
+    z-index: 1;
+  }
+  .ot-dot.done { background: #1a7f37; }
+  .ot-dot.active { background: #0969da; }
+  .ot-label { font-size: 9px; color: #57606a; text-align: center; line-height: 1.3; }
+  .ot-label strong { display: block; color: #1f2328; font-size: 10px; }
+
+  .input-bar {
+    padding: 12px 20px;
+    background: #ffffff;
+    border-top: 1px solid #d0d7de;
+    display: flex;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+  .btn { border: none; border-radius: 6px; padding: 8px 18px; font-size: 13px; font-weight: 500; cursor: pointer; }
+  .btn-primary { background: #0969da; color: white; }
+  .btn-secondary { background: #f6f8fa; color: #1f2328; border: 1px solid #d0d7de; }
+  .btn-export { background: #dafbe1; color: #1a7f37; border: 1px solid #4ac26b44; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-logo"><span>LEON</span> · SOPHIA</div>
+  <div class="topbar-topic">Should we migrate our data pipeline to a streaming architecture?</div>
+  <div class="topbar-status">✓ Converged · Round 4 · Score 8.1</div>
+</div>
+
+<div class="main">
+
+  <div class="sidebar">
+    <div class="sidebar-header">Timeline</div>
+    <div class="depth-bar">
+      <div class="depth-label">✓ Convergence reached</div>
+      <div class="depth-track"><div class="depth-fill"></div></div>
+      <div style="font-size:9px;color:#1a7f37;margin-top:3px;">4 rounds · Score 8.1 / 10</div>
+    </div>
+    <div class="round-entry leon">
+      <div class="round-label leon">⚙ LEON <span class="badge score">R1</span></div>
+      <div class="round-sub">Initial migration strategy</div>
+    </div>
+    <div class="round-entry sophia">
+      <div class="round-label sophia">🔍 SOPHIA</div>
+      <div class="round-sub">2 blocking flags raised</div>
+    </div>
+    <div class="round-entry leon">
+      <div class="round-label leon">⚙ LEON <span class="badge score">R2</span></div>
+      <div class="round-sub">Tier B evidence added</div>
+    </div>
+    <div class="round-entry sophia">
+      <div class="round-label sophia">🔍 SOPHIA</div>
+      <div class="round-sub">Score 6.2 · 1 flag remains</div>
+    </div>
+    <div class="round-entry leon">
+      <div class="round-label leon">⚙ LEON <span class="badge score">R3</span></div>
+      <div class="round-sub">Phased cutover model</div>
+    </div>
+    <div class="round-entry sophia">
+      <div class="round-label sophia">🔍 SOPHIA</div>
+      <div class="round-sub">Score 8.1 · All flags clear</div>
+    </div>
+    <div class="round-entry synthesis active">
+      <div class="round-label synthesis">⚡ SYNTHESIS <span class="badge high">8.1</span></div>
+      <div class="round-sub">Final decision · Guide · Prediction</div>
+    </div>
+  </div>
+
+  <div class="detail">
+
+    <div class="convergence-banner">
+      <div class="convergence-icon">⚡</div>
+      <div>
+        <div class="convergence-title">Convergence Reached</div>
+        <div class="convergence-sub">4 rounds · All blocking flags resolved · Ethics cleared · SOPHIA approved</div>
+      </div>
+      <div class="convergence-meta">
+        <div class="score-big">8.1</div>
+        <div class="score-big-label">Quality Score</div>
+      </div>
+    </div>
+
+    <div class="detail-body">
+
+      <!-- 1. FINAL DECISION -->
+      <div class="section-card">
+        <div class="section-card-header">
+          <span class="icon">⚖️</span>
+          <h3>Final Decision</h3>
+          <span class="sub">DEC-001 · Synthesis-Approved</span>
+        </div>
+        <div class="section-card-body">
+          <div class="decision-row">
+            <div class="decision-label">Recommendation</div>
+            <div class="decision-value"><strong>Proceed with streaming migration using a dual-write transition period of 6–8 weeks.</strong> Migrate incrementally by data domain, beginning with the lowest-criticality pipelines. Maintain batch fallback until streaming pipelines pass a 2-week stability window.</div>
+          </div>
+          <div class="decision-row">
+            <div class="decision-label">Clearances</div>
+            <div class="decision-value">
+              <span class="chip green">✓ Ethics cleared</span>
+              <span class="chip green">✓ Bias cleared</span>
+              <span class="chip green">✓ Evidence Tier B+</span>
+            </div>
+          </div>
+          <div class="decision-row">
+            <div class="decision-label">Key trade-off</div>
+            <div class="decision-value">Chose phased cutover over hard switchover — accepting 6–8 weeks of dual-write overhead in exchange for eliminating the operational risk SOPHIA flagged in Round 1.</div>
+          </div>
+          <div class="decision-row">
+            <div class="decision-label">Open advisories</div>
+            <div class="decision-value"><span class="chip yellow">⚠ Rollback cost not yet modeled — resolve within 2 weeks</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. ACHIEVEMENT GUIDE -->
+      <div class="section-card">
+        <div class="section-card-header">
+          <span class="icon">🗺️</span>
+          <h3>How to Achieve This</h3>
+          <span class="sub">LEON's implementation roadmap · SOPHIA-reviewed</span>
+        </div>
+        <div class="section-card-body" style="padding: 8px 16px;">
+          <div class="guide-step">
+            <div class="step-num">1</div>
+            <div class="step-content">
+              <div class="step-title">Audit current batch pipelines</div>
+              <div class="step-desc">Catalog all pipelines by criticality, data volume, and downstream dependencies. Identify the 2–3 lowest-risk candidates for the first streaming migration wave.</div>
+              <div class="step-meta"><span class="chip blue">Week 1–2</span><span class="chip green">Owner: Data Eng</span></div>
+            </div>
+          </div>
+          <div class="guide-step">
+            <div class="step-num">2</div>
+            <div class="step-content">
+              <div class="step-title">Stand up dual-write infrastructure</div>
+              <div class="step-desc">Configure streaming platform (Kafka/Kinesis) in parallel with existing batch. Both systems write simultaneously during transition. No cutover until stability is confirmed.</div>
+              <div class="step-meta"><span class="chip blue">Week 2–4</span><span class="chip green">Owner: Platform</span></div>
+            </div>
+          </div>
+          <div class="guide-step">
+            <div class="step-num">3</div>
+            <div class="step-content">
+              <div class="step-title">Migrate Wave 1 pipelines</div>
+              <div class="step-desc">Cut the 2–3 low-criticality pipelines to streaming-only after 2-week dual-write stability window. Monitor latency, throughput, and error rates against batch baseline.</div>
+              <div class="step-meta"><span class="chip blue">Week 4–6</span><span class="chip green">Owner: Data Eng</span></div>
+            </div>
+          </div>
+          <div class="guide-step">
+            <div class="step-num">4</div>
+            <div class="step-content">
+              <div class="step-title">Expand to critical pipelines</div>
+              <div class="step-desc">Apply lessons from Wave 1. Migrate remaining pipelines in order of increasing criticality. Each wave requires its own 2-week stability window before cutover.</div>
+              <div class="step-meta"><span class="chip blue">Week 6–10</span><span class="chip yellow">⚠ Model rollback cost first</span></div>
+            </div>
+          </div>
+          <div class="guide-step">
+            <div class="step-num">5</div>
+            <div class="step-content">
+              <div class="step-title">Decommission batch infrastructure</div>
+              <div class="step-desc">Once all pipelines are stable on streaming for 4+ weeks, retire batch systems. Archive configurations. Update monitoring and alerting to streaming-native tooling.</div>
+              <div class="step-meta"><span class="chip blue">Week 12–14</span><span class="chip green">Owner: Platform</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. BEST PREDICTED OUTCOME -->
+      <div class="section-card">
+        <div class="section-card-header">
+          <span class="icon">🔭</span>
+          <h3>Best Predicted Outcome</h3>
+          <span class="sub">LEON's future-state model · Confidence 7.4/10</span>
+        </div>
+        <div class="section-card-body">
+          <div class="outcome-grid">
+            <div class="outcome-metric">
+              <div class="metric-val">~65%</div>
+              <div class="metric-label">Latency reduction</div>
+              <div class="metric-conf">Confidence: High</div>
+            </div>
+            <div class="outcome-metric">
+              <div class="metric-val">14 wks</div>
+              <div class="metric-label">Full migration</div>
+              <div class="metric-conf">Confidence: Medium</div>
+            </div>
+            <div class="outcome-metric">
+              <div class="metric-val">10×</div>
+              <div class="metric-label">Scale headroom</div>
+              <div class="metric-conf">Confidence: High</div>
+            </div>
+          </div>
+
+          <p style="font-size:12.5px; color:#1f2328; margin-bottom:12px; line-height:1.7;">
+            Based on 3 comparable financial-sector migrations (Tier B evidence), the most likely outcome is a 60–70% reduction in pipeline latency, stable streaming infrastructure within 14 weeks, and a data architecture capable of 10× current throughput without redesign. The phased approach LEON converged on reduces the probability of a full rollback from ~35% (hard switchover) to &lt;8% (dual-write model).
+          </p>
+
+          <div style="font-size:11px;color:#57606a;margin-bottom:8px;font-weight:600;text-transform:uppercase;letter-spacing:0.6px;">Predicted milestone timeline</div>
+          <div class="outcome-timeline">
+            <div class="ot-node">
+              <div class="ot-dot done"></div>
+              <div class="ot-label"><strong>Now</strong>Decision made</div>
+            </div>
+            <div class="ot-node">
+              <div class="ot-dot active"></div>
+              <div class="ot-label"><strong>Wk 2</strong>Audit done</div>
+            </div>
+            <div class="ot-node">
+              <div class="ot-dot"></div>
+              <div class="ot-label"><strong>Wk 4</strong>Dual-write live</div>
+            </div>
+            <div class="ot-node">
+              <div class="ot-dot"></div>
+              <div class="ot-label"><strong>Wk 6</strong>Wave 1 cut</div>
+            </div>
+            <div class="ot-node">
+              <div class="ot-dot"></div>
+              <div class="ot-label"><strong>Wk 10</strong>All migrated</div>
+            </div>
+            <div class="ot-node">
+              <div class="ot-dot"></div>
+              <div class="ot-label"><strong>Wk 14</strong>Batch retired</div>
+            </div>
+          </div>
+
+          <div style="margin-top:12px;padding:10px 12px;background:#fff8c5;border-radius:6px;border:1px solid #d4a72c44;font-size:12px;color:#9a6700;">
+            <strong>SOPHIA's confidence note:</strong> The 7.4/10 confidence is capped by the unmodeled rollback cost (open advisory). Resolving this within 2 weeks will bring the overall prediction confidence to ~8.5/10.
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="input-bar">
+      <button class="btn btn-export">⬇ Export Decision</button>
+      <button class="btn btn-secondary">View Full Debate</button>
+      <button class="btn btn-primary" style="margin-left:auto;">New Debate</button>
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>
