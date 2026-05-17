@@ -5,20 +5,9 @@ import { TimelineSidebar } from './components/TimelineSidebar'
 import { DetailPanel } from './components/DetailPanel'
 import { useDebate } from './hooks/useDebate'
 import { useEvolution } from './hooks/useEvolution'
+import { EvolutionPanel } from './components/evolution/EvolutionPanel'
+import { ConvergenceScreen } from './components/convergence/ConvergenceScreen'
 import type { RoundEntry } from './types/debate'
-
-// Placeholders — replaced in Tasks 11 and 12
-function EvolutionPanel(_props: { evolution: ReturnType<typeof useEvolution> }) {
-  return <div style={{ padding: 12, color: 'var(--text-secondary)', fontSize: 13 }}>Evolution data will appear here.</div>
-}
-
-function ConvergenceScreen(_props: {
-  convergence: NonNullable<Extract<ReturnType<typeof useDebate>['state'], { phase: 'converged' }>['convergence']>
-  onViewDebate: () => void
-  onNewDebate: () => void
-}) {
-  return <div style={{ padding: 24 }}>Convergence screen placeholder</div>
-}
 
 export default function App() {
   const { state, startDebate, reset } = useDebate()
