@@ -1,0 +1,35 @@
+:root {
+  --bg: #f6f8fa;
+  --surface: #ffffff;
+  --border: #d0d7de;
+  --leon: #0969da;
+  --sophia: #cf222e;
+  --converged: #1a7f37;
+  --advisory: #d29922;
+  --text: #1f2328;
+  --text-secondary: #57606a;
+  --radius: 8px;
+  --radius-chip: 20px;
+  font-family: 'Segoe UI', -apple-system, sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body { background: var(--bg); color: var(--text); height: 100dvh; overflow: hidden; }
+
+#root { height: 100dvh; display: flex; flex-direction: column; }
+
+.surface { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); }
+
+.chip {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 2px 10px; border-radius: var(--radius-chip);
+  font-size: 12px; font-weight: 500;
+}
+.chip-leon { background: #dbeafe; color: var(--leon); }
+.chip-sophia { background: #fee2e2; color: var(--sophia); }
+.chip-converged { background: #dcfce7; color: var(--converged); }
+.chip-blocking { background: #fee2e2; color: var(--sophia); }
+.chip-advisory { background: #fef9c3; color: var(--advisory); }
+
+@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
