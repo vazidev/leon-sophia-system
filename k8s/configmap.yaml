@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: leon-sophia-config
+  namespace: leon-sophia
+data:
+  FRONTEND_ORIGIN: "${FRONTEND_ORIGIN}"
