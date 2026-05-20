@@ -12,9 +12,16 @@ from models.debate import DebateSession, LeonEvolution
 from orchestrator import run_debate
 
 load_dotenv()
-create_db()
 
 app = FastAPI(title="LEON-SOPHIA Debate API")
+
+
+@app.on_event("startup")
+async def startup_event():
+    try:
+        create_db()
+    except Exception as e:
+        print(f"Warning: Database initialization failed: {e}")
 
 app.add_middleware(
     CORSMiddleware,
