@@ -1,6 +1,8 @@
 import os
 import json
 import uuid
+import logging
+from contextlib import asynccontextmanager
 from fastapi import FastAPI, Depends, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
@@ -13,15 +15,17 @@ from orchestrator import run_debate
 
 load_dotenv()
 
-app = FastAPI(title="LEON-SOPHIA Debate API")
 
-
-@app.on_event("startup")
-async def startup_event():
+@asynccontextmanager
+async def lifespan(app: FastAPI):
     try:
         create_db()
     except Exception as e:
-        print(f"Warning: Database initialization failed: {e}")
+        logging.critical("Database initialization failed: %s", e)
+        raise
+    yield
+
+app = FastAPI(title="LEON-SOPHIA Debate API", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,

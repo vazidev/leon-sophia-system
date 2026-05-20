@@ -21,7 +21,7 @@ services:
     ports:
       - "8000:8000"
     environment:
-      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:?ANTHROPIC_API_KEY must be set in .env or environment}
       DATABASE_URL: postgresql://postgres:${DB_PASSWORD:-devpassword}@db:5432/leonsophia
       FRONTEND_ORIGIN: http://localhost:5175
     depends_on:
