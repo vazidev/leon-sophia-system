@@ -23,8 +23,9 @@ export default defineConfig({
     })
   ],
   server: {
+    port: 5175,
     proxy: {
-      '/api': 'http://localhost:8000'
+      '/api': process.env.VITE_API_TARGET || 'http://localhost:8000'
     }
   },
   test: {
