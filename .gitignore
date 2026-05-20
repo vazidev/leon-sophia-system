@@ -6,3 +6,6 @@ __pycache__/
 .env.local
 .DS_Store
 *.log
+
+# AWS infra operator config — contains DB_PASSWORD, never commit
+infra/config.env
