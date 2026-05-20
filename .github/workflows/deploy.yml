@@ -55,7 +55,13 @@ jobs:
           if [ -n "${{ vars.DOMAIN }}" ]; then
             export FRONTEND_ORIGIN="https://${{ vars.DOMAIN }}"
           else
-            export FRONTEND_ORIGIN="http://pending-alb-hostname"
+            ALB_HOST=$(kubectl get ingress leon-sophia -n leon-sophia \
+              -o jsonpath='{.status.loadBalancer.ingress[0].hostname}' 2>/dev/null || echo "")
+            if [ -z "$ALB_HOST" ]; then
+              echo "ERROR: DOMAIN variable not set and ALB not yet provisioned. Set DOMAIN in GitHub Variables." >&2
+              exit 1
+            fi
+            export FRONTEND_ORIGIN="http://$ALB_HOST"
           fi
           envsubst '${FRONTEND_ORIGIN}' < k8s/configmap.yaml | kubectl apply -f -
 

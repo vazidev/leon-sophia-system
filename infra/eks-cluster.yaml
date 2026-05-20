@@ -12,7 +12,7 @@ managedNodeGroups:
     maxSize: 4
     desiredCapacity: 2
     volumeSize: 20
-    amiFamily: AmazonLinux2
+    amiFamily: AmazonLinux2023
 
 iam:
   withOIDC: true   # Required for ALB controller and GitHub Actions OIDC

@@ -93,7 +93,7 @@ cat > /tmp/trust-policy.json <<EOF
       "StringEquals": {
         "token.actions.githubusercontent.com:aud": "sts.amazonaws.com"
       },
-      "StringLike": {
+      "StringEquals": {
         "token.actions.githubusercontent.com:sub": "repo:${GITHUB_REPO}:ref:refs/heads/main"
       }
     }

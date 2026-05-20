@@ -16,7 +16,7 @@ SUBNET_IDS=$(aws ec2 describe-subnets \
     "Name=tag:kubernetes.io/role/internal-elb,Values=1" \
   --query "Subnets[*].SubnetId" \
   --region "$AWS_REGION" \
-  --output text | tr '\t' ',')
+  --output text | tr '\t' ' ')
 
 aws rds create-db-subnet-group \
   --db-subnet-group-name leon-sophia-db \
